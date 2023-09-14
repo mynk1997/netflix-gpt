@@ -4,11 +4,18 @@ import { useDispatch, useSelector } from "react-redux";
 import openai from "../utils/openAi";
 import { API_OPTIONS } from "../utils/constants";
 import { addGptMovieResult } from "../utils/gptSlice";
+import OpenAI from "openai";
 
 const GptSearchBar = () => {
+  const [userApiKey, setUserApiKey] = useState("");
   const dispatch = useDispatch();
   const searchText = useRef(null);
   const [errorMessage, setErrorMessage] = useState(null);
+
+  const openai = new OpenAI({
+    apiKey: userApiKey,
+    dangerouslyAllowBrowser: true, // defaults to process.env["OPENAI_API_KEY"]
+  });
 
   //search movie in TMDB
   const searchMovieTMDB = async (movie) => {
@@ -44,9 +51,9 @@ const GptSearchBar = () => {
     const movies = backupMovies.split(",");
     console.log(movies);
     const promiseArray = movies.map((movie) => searchMovieTMDB(movie));
-    const tmdbData= await Promise.all(promiseArray)
+    const tmdbData = await Promise.all(promiseArray);
     console.log(tmdbData);
-    dispatch(addGptMovieResult({movieNames: movies, movieData:tmdbData}));
+    dispatch(addGptMovieResult({ movieNames: movies, movieData: tmdbData }));
   };
 
   const langKey = useSelector((store) => store?.config?.lang);
@@ -58,9 +65,18 @@ const GptSearchBar = () => {
       >
         <input
           ref={searchText}
-          className=" p-4 m-4 col-span-9"
+          className=" p-4 m-4 col-span-5"
           type="text"
           placeholder={lang[langKey].gptSearchPlaceholder}
+        />
+        <input
+          className=" p-4 m-4 col-span-4"
+          type="text"
+          value={userApiKey}
+          onChange={(e) => {
+            setUserApiKey(e.target.value);
+          }}
+          placeholder={lang[langKey].gptApiKey}
         />
         <button
           className="col-span-3 m-4 py-2 px-4 bg-red-700 text-white rounded-lg"
@@ -70,12 +86,14 @@ const GptSearchBar = () => {
         </button>
         <p className="text-white col-span-9 m-4">
           {errorMessage}
-          {errorMessage&&<button
-            onClick={handleStandardSearch}
-            className="text-red-500 underline"
-          >
-            Use standard search instead
-          </button>}
+          {errorMessage && (
+            <button
+              onClick={handleStandardSearch}
+              className="text-red-500 underline"
+            >
+              Use standard search instead
+            </button>
+          )}
         </p>
       </form>
     </div>
