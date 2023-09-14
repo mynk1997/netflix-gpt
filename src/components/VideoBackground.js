@@ -4,10 +4,11 @@ import useGetMovieTrailer from "../hooks/useGetMovieTrailer";
 const VideoBackground = ({ movieId }) => {
   const trailerVideo = useSelector((store) => store?.movie?.trailerVideo);
   useGetMovieTrailer(movieId);
+
   return (
-    <div className="w-screen ">
+    <div className="w-[100%] ">
       <iframe
-        className="w-screen aspect-video -top-100"
+        className="w-[100%] aspect-video -top-100"
         src={
           "https://www.youtube.com/embed/" +
           trailerVideo?.key +
